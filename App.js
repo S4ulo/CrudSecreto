@@ -3,25 +3,34 @@ import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Image } 
 
 export default function App() {
   const [compromisso, setCompromisso] = useState('');
+  const [data, setData] = useState(''); // Estado para armazenar a data
+  const [hora, setHora] = useState(''); // Estado para armazenar a hora
   const [compromissos, setCompromissos] = useState([]);
   const [indiceEditando, setIndiceEditando] = useState(null);
 
   const adicionarCompromisso = () => {
     if (compromisso.trim() === '') return;
 
+    const novoCompromisso = `${compromisso} - Data: ${data} - Hora: ${hora}`;
     const novosCompromissos = [...compromissos];
     if (indiceEditando !== null) {
-      novosCompromissos[indiceEditando] = compromisso;
+      novosCompromissos[indiceEditando] = novoCompromisso;
     } else {
-      novosCompromissos.push(compromisso);
+      novosCompromissos.push(novoCompromisso);
     }
     setCompromissos(novosCompromissos);
     setCompromisso('');
+    setData(''); // Limpa a data
+    setHora(''); // Limpa a hora
     setIndiceEditando(null);
   };
 
   const editarCompromisso = (indice) => {
-    setCompromisso(compromissos[indice]);
+    const compromissoAtual = compromissos[indice];
+    const partes = compromissoAtual.split(' - ');
+    setCompromisso(partes[0]);
+    setData(partes[1].replace('Data: ', '')); // Extrai a data
+    setHora(partes[2].replace('Hora: ', '')); // Extrai a hora
     setIndiceEditando(indice);
   };
 
@@ -42,6 +51,18 @@ export default function App() {
           value={compromisso}
           onChangeText={(text) => setCompromisso(text)}
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Data"
+          value={data}
+          onChangeText={(text) => setData(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Hora"
+          value={hora}
+          onChangeText={(text) => setHora(text)}
+        />
         <TouchableOpacity style={styles.botao} onPress={adicionarCompromisso}>
           <Image source={require('./imagens/livroSecreto.png')} style={styles.botaoImagem} />
         </TouchableOpacity>
@@ -51,11 +72,11 @@ export default function App() {
         renderItem={({ item, index }) => (
           <View style={styles.itemCompromisso}>
             <Text>{item}</Text>
-            <TouchableOpacity onPress={() => editarCompromisso(index)}>
-              <Image source={require('./imagens/lampada.png')} style={styles.botaoEditar} />
+            <TouchableOpacity style={styles.botaoEditar} onPress={() => editarCompromisso(index)}>
+              <Text style={styles.botaoTexto}>Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => excluirCompromisso(index)}>
-              <Image source={require('./imagens/explosao.png')} style={styles.botaoExcluir} />
+            <TouchableOpacity style={styles.botaoExcluir} onPress={() => excluirCompromisso(index)}>
+              <Text style={styles.botaoTexto}>Excluir</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -97,11 +118,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+  },
+  botaoTexto: {
+    color: 'white',
   },
   botaoImagem: {
     width: 40,
-    height:40,
+    height: 40,
+    marginRight: 5,
   },
   itemCompromisso: {
     flexDirection: 'row',
@@ -115,11 +140,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   botaoEditar: {
-    width:40,
-    height: 30,
+    width: 60,
+    backgroundColor: 'green',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   botaoExcluir: {
-    width: 25,
-    height: 25,
+    width: 60,
+    backgroundColor: 'red',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
